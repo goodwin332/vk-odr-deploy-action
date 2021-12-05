@@ -1,0 +1,31 @@
+name: "VK Mini apps ODR deploy"
+description: "Build and deploy ODR to VK Mini apps"
+inputs:
+    app_id:
+        description: "VK App ID"
+        required: true
+    token:
+        description: "VK App service token"
+        required: true
+    api_host:
+        description: "VK api base url"
+        required: false
+        default: "https://api.vk.com/method/"
+    environment:
+        description: "Application environment"
+        required: false
+        default: "dev"
+    static_path:
+        description: "Build files static path"
+        required: false
+        default: "build/"
+    zip_file:
+        description: "Complete zip file with build inside"
+        required: false
+        default: ""
+outputs:
+    response:
+        description: "HTTP Response Content"
+runs:
+    using: "node12"
+    main: "index.js"

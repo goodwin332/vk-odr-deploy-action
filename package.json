@@ -1,0 +1,28 @@
+{
+  "name": "@goodwin332/vk-odr-deploy-action",
+  "version": "1.0.0",
+  "description": "Deploy to VK Mini Apps ODR by Github Actions",
+  "main": "index.js",
+  "engines": {
+    "node": ">=8.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/goodwin332/vk-odr-deploy-action.git"
+  },
+  "homepage": "https://github.com/goodwin332/vk-odr-deploy-action",
+  "dependencies": {
+    "@actions/core": "^1.6.0",
+    "@actions/github": "^5.0.0",
+    "async": "^3.2.0",
+    "chalk": "^3.0.0",
+    "configstore": "^5.0.0",
+    "form-data": "^3.0.0",
+    "fs-extra": "^8.0.1",
+    "glob": "^7.1.6",
+    "node-fetch": "^2.6.0",
+    "prompts": "^2.1.0",
+    "require-module": "^0.1.0",
+    "zip-a-folder": "0.0.12"
+  }
+}
