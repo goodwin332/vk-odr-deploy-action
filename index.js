@@ -33,46 +33,57 @@ async function apiRequest(method, params) {
     }
 }
 
-async function run(cfg) {
+async function upload(uploadUrl, bundleFile) {
+    const formData = new FormData();
+    formData.append('file', fs.createReadStream(bundleFile), {contentType: 'application/zip'});
     try {
-        const params = {
-            app_id: config.appID,
-            environment: config.environment == 'production' ? 2 : 1
-        };
-
-        const respBundleUpload = await apiRequest('apps.getBundleUploadServer', params);
-        if (!r || !r.upload_url) {
-            throw new Error(JSON.stringify('upload_url is undefined', r));
-        }
-
-        if (config.zipFile.length == 0) {
-            config.zipFile = './build.zip';
-            const excludedFiles = await glob.sync('./' + config.staticPath + '/**/*.txt');
-            await excludedFiles.forEach((file) => {
-                fs.removeSync(file);
-            });
-            if (await fs.pathExists(config.zipFile)) {
-                fs.removeSync(config.zipFile)
-            }
-
-            await zip('./' + config.staticPath, config.zipFile);
-        }
-        if (!fs.pathExists(config.zipFile)) {
-            console.error('Empty bundle file: ' + config.zipFile);
-            return false;
-        }
-
-        return await upload(respBundleUpload.upload_url, config.zipFile).then((resp) => {
-            if (resp.version) {
-                console.log('Uploaded version ' + resp.version + '!');
-                //return getQueue(resp.version);
-            } else {
-                console.error('Upload error:', resp)
-            }
-        });
+      const upload = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: formData.getHeaders(),
+        body: formData
+      });
+      return await upload.json();
     } catch (e) {
-        console.error(chalk.red(e));
-        process.exit(1);
+      console.error('upload error', e);
     }
+  }
+
+try {
+    const params = {
+        app_id: config.appID,
+        environment: config.environment == 'production' ? 2 : 1
+    };
+
+    const respBundleUpload = await apiRequest('apps.getBundleUploadServer', params);
+    if (!r || !r.upload_url) {
+        throw new Error(JSON.stringify('upload_url is undefined', r));
+    }
+
+    if (config.zipFile.length == 0) {
+        config.zipFile = './build.zip';
+        const excludedFiles = await glob.sync('./' + config.staticPath + '/**/*.txt');
+        await excludedFiles.forEach((file) => {
+            fs.removeSync(file);
+        });
+        if (await fs.pathExists(config.zipFile)) {
+            fs.removeSync(config.zipFile)
+        }
+
+        await zip('./' + config.staticPath, config.zipFile);
+    }
+    if (!fs.pathExists(config.zipFile)) {
+        console.error('Empty bundle file: ' + config.zipFile);
+        return false;
+    }
+
+    await upload(respBundleUpload.upload_url, config.zipFile).then((resp) => {
+        if (resp.version) {
+            console.log('Uploaded version ' + resp.version + '!');
+            //return getQueue(resp.version);
+        } else {
+            console.error('Upload error:', resp)
+        }
+    });
+} catch (error) {
+    core.setFailed(error.message);
 }
-await run();
