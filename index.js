@@ -2,14 +2,14 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 
 const config = {
-    appID = core.getInput('app_id'),
-    serviceToken = core.getInput('token'),
-    apiHost = core.getInput('api_host'),
-    staticPath = core.getInput('static_path'),
-    zipFile = core.getInput('zip_file'),
-    environment = core.getInput('environment'),
-    apiVersion = '5.131',
-    clientVersion = 2,
+    appID: core.getInput('app_id'),
+    serviceToken: core.getInput('token'),
+    apiHost: core.getInput('api_host'),
+    staticPath: core.getInput('static_path'),
+    zipFile: core.getInput('zip_file'),
+    environment: core.getInput('environment'),
+    apiVersion: '5.131',
+    clientVersion: 2,
 }
 
 async function apiRequest(method, params) {
@@ -75,7 +75,4 @@ async function run(cfg) {
         process.exit(1);
     }
 }
-
-module.exports = {
-    run: run
-};
+await run();
