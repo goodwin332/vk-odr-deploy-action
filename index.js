@@ -57,8 +57,8 @@ const run = async function() {
         };
     
         const respBundleUpload = await apiRequest('apps.getBundleUploadServer', params);
-        if (!r || !r.upload_url) {
-            throw new Error(JSON.stringify('upload_url is undefined', r));
+        if (!respBundleUpload || !respBundleUpload.upload_url) {
+            throw new Error(JSON.stringify('upload_url is undefined', respBundleUpload));
         }
     
         if (config.zipFile.length == 0) {
