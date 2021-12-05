@@ -48,42 +48,46 @@ async function upload(uploadUrl, bundleFile) {
     }
   }
 
-try {
-    const params = {
-        app_id: config.appID,
-        environment: config.environment == 'production' ? 2 : 1
-    };
 
-    const respBundleUpload = await apiRequest('apps.getBundleUploadServer', params);
-    if (!r || !r.upload_url) {
-        throw new Error(JSON.stringify('upload_url is undefined', r));
-    }
-
-    if (config.zipFile.length == 0) {
-        config.zipFile = './build.zip';
-        const excludedFiles = await glob.sync('./' + config.staticPath + '/**/*.txt');
-        await excludedFiles.forEach((file) => {
-            fs.removeSync(file);
+const run = async function() {
+    try {
+        const params = {
+            app_id: config.appID,
+            environment: config.environment == 'production' ? 2 : 1
+        };
+    
+        const respBundleUpload = await apiRequest('apps.getBundleUploadServer', params);
+        if (!r || !r.upload_url) {
+            throw new Error(JSON.stringify('upload_url is undefined', r));
+        }
+    
+        if (config.zipFile.length == 0) {
+            config.zipFile = './build.zip';
+            const excludedFiles = await glob.sync('./' + config.staticPath + '/**/*.txt');
+            await excludedFiles.forEach((file) => {
+                fs.removeSync(file);
+            });
+            if (await fs.pathExists(config.zipFile)) {
+                fs.removeSync(config.zipFile)
+            }
+    
+            await zip('./' + config.staticPath, config.zipFile);
+        }
+        if (!fs.pathExists(config.zipFile)) {
+            console.error('Empty bundle file: ' + config.zipFile);
+            return false;
+        }
+    
+        await upload(respBundleUpload.upload_url, config.zipFile).then((resp) => {
+            if (resp.version) {
+                console.log('Uploaded version ' + resp.version + '!');
+                //return getQueue(resp.version);
+            } else {
+                console.error('Upload error:', resp)
+            }
         });
-        if (await fs.pathExists(config.zipFile)) {
-            fs.removeSync(config.zipFile)
-        }
-
-        await zip('./' + config.staticPath, config.zipFile);
+    } catch (error) {
+        core.setFailed(error.message);
     }
-    if (!fs.pathExists(config.zipFile)) {
-        console.error('Empty bundle file: ' + config.zipFile);
-        return false;
-    }
-
-    await upload(respBundleUpload.upload_url, config.zipFile).then((resp) => {
-        if (resp.version) {
-            console.log('Uploaded version ' + resp.version + '!');
-            //return getQueue(resp.version);
-        } else {
-            console.error('Upload error:', resp)
-        }
-    });
-} catch (error) {
-    core.setFailed(error.message);
 }
+run();
