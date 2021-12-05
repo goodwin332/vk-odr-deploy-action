@@ -62,9 +62,7 @@ environment.js
 
 # Vendor #
 ##########
-package-lock.json
 /vendor
-/node_modules
 
 # Cache #
 #########
